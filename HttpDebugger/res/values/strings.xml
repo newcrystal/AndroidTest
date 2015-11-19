@@ -2,7 +2,7 @@
 <resources>
 
     <string name="app_name">HttpDebugger</string>
-    <string name="hello_world">Hello world!</string>
-    <string name="action_settings">Settings</string>
+    <string name="http_debug_start">Http Debug Start!</string>
+    <string name="action_settings">Action</string>
 
 </resources>

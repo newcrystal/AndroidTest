@@ -6,11 +6,12 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.crystal.httpdebugger.MainActivity" >
+    tools:context="com.crystal.httpdebugger.HTTPDebugActivity" >
 
     <Button
-        android:id="@+id/startBtn"
+        android:id="@+id/appBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/http_debug_start" />
+        android:text="@string/app_name" />
+    
 </RelativeLayout>
