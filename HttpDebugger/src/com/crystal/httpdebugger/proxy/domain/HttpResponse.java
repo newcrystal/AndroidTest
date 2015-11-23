@@ -1,4 +1,4 @@
-package com.crystal.httpdebugger.domain.response;
+package com.crystal.httpdebugger.proxy.domain;
 
 import java.util.Map;
 

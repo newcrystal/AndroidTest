@@ -1,17 +1,25 @@
-package com.crystal.httpdebugger.domain.request;
+package com.crystal.httpdebugger.proxy.domain;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.StringTokenizer;
 
 public class HttpRequest {
 	private String url;//1.[1]]
 	private String method; //1.[0]
 	private int port = 80;
-	private Map<String, String> elements = new HashMap<String, String>();
+	private Map<String, String> header = new HashMap<String, String>();
 	
 	public HttpRequest() {};
+
+	public void createHttpRequestData(String inputLine, boolean isFirstRow) {
+		StringTokenizer tok = new StringTokenizer(inputLine);
+		tok.nextToken();
+		if (isFirstRow) initialize(inputLine);
+		else addHeader(inputLine.split(": ")[0], inputLine.split(": ")[1]);
+	}
 	
-	public HttpRequest(String line) {
+	public void initialize(String line) {
 		String[] tokens = line.split(" ");
         method = tokens[0];
         url = tokens[1];
@@ -22,8 +30,8 @@ public class HttpRequest {
 		if (url.replaceAll("http://", "").indexOf(":") >= 0) port = Integer.parseInt(url.replaceAll("http://", "").split(":")[1].split("/")[0]);
 	}
 	
-	public void append(String name, String value) {
-		elements.put(name, value);
+	public void addHeader(String name, String value) {
+		header.put(name, value);
 	}
 
 	public String getUrl() {
@@ -51,10 +59,6 @@ public class HttpRequest {
 	}
 
 	public String get(String name) {
-		return elements.get(name);
-	}
-
-	public void setElements(Map<String, String> elements) {
-		this.elements = elements;
+		return header.get(name);
 	}
 }

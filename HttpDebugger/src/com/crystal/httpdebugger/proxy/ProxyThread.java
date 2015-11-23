@@ -1,20 +1,46 @@
 package com.crystal.httpdebugger.proxy;
 
-import java.net.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.SocketException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.UnknownHostException;
 import java.nio.charset.Charset;
-import java.io.*;
-import java.util.*;
 
-import com.crystal.httpdebugger.domain.request.HttpRequest;
-import com.crystal.httpdebugger.domain.response.HttpResponse;
+import android.app.Activity;
+import android.view.ViewGroup.LayoutParams;
+import android.widget.Button;
+import android.widget.LinearLayout;
+
+import com.crystal.httpdebugger.R;
+import com.crystal.httpdebugger.proxy.domain.HttpRequest;
+import com.crystal.httpdebugger.proxy.domain.HttpResponse;
+import com.crystal.httpdebugger.proxy.domain.ProxyResult;
+import com.crystal.httpdebugger.ui.UrlList;
 
 public class ProxyThread extends Thread {
     private Socket socket = null;
     private static final int BUFFER_SIZE = 1024;
     private static final int SOCKET_TIMEOUT = 3000;
-    public ProxyThread(Socket socket) {
+    private HttpRequest httpRequest = new HttpRequest();
+    private HttpResponse httpResponse = new HttpResponse();
+    private Activity activity;
+    private UrlList urlList;
+    
+    public ProxyThread(Socket socket, Activity activity) {
         super("ProxyThread");
         this.socket = socket;
+        this.activity = activity;
+        this.urlList = new UrlList(activity);
     }
 
     @Override
@@ -22,31 +48,11 @@ public class ProxyThread extends Thread {
         DataOutputStream out = getDataOutputStream();
 		BufferedReader in = getBufferedReader();
 
-        String inputLine;
-        boolean isFirstRow = true;
-        HttpRequest request = null;
 
     	Socket realServerSocket = getRealServerSocket();
-        
         PrintWriter writerToRealServerSocket = null;
         try {
-			while ((inputLine = in.readLine()) != null && !"".equals(inputLine)) {
-			    try {
-			        request = createHttpRequestData(inputLine, request, isFirstRow);
-			        } catch (Exception e) {
-			        break;
-			    }
-			        
-			    if (writerToRealServerSocket == null) {
-					try {
-						writerToRealServerSocket = getRealServerSocketOutputStream(request, realServerSocket);
-					} catch (URISyntaxException e) {
-						e.printStackTrace();
-					}
-		        }
-			   writerToRealServerSocket.println(inputLine); 
-			   isFirstRow = false;
-			}
+            readRequestAndWriteOutputStream(in, realServerSocket, writerToRealServerSocket);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -55,7 +61,7 @@ public class ProxyThread extends Thread {
         
         try {
 		    try {
-		    	saveAndWriteResponse(out, request, realServerSocket);
+		    	saveAndWriteResponse(out, httpRequest, realServerSocket);
              } catch (Exception e) {
                 System.err.println("Encountered exception: " + e);
                 out.writeBytes("");
@@ -79,10 +85,35 @@ public class ProxyThread extends Thread {
             if (socket != null) {
                 socket.close();
             }
+            urlList.add(new ProxyResult(getHttpRequest(), getHttpResponse()));
         } catch (Exception e) {
     	  e.printStackTrace(); 
        }
+       
    }
+
+	private void readRequestAndWriteOutputStream(BufferedReader in, Socket realServerSocket, PrintWriter writerToRealServerSocket) throws IOException, UnknownHostException {
+		String inputLine;
+		boolean isFirstRow = true;
+		
+		while ((inputLine = in.readLine()) != null && !"".equals(inputLine)) {
+		    try {
+		        httpRequest.createHttpRequestData(inputLine, isFirstRow);
+		        } catch (Exception e) {
+		        break;
+		    }
+		        
+		    if (writerToRealServerSocket == null) {
+				try {
+					writerToRealServerSocket = getRealServerSocketOutputStream(httpRequest, realServerSocket);
+				} catch (URISyntaxException e) {
+					e.printStackTrace();
+				}
+		    }
+		   writerToRealServerSocket.println(inputLine); 
+		   isFirstRow = false;
+		}
+	}
 
 	private void saveAndWriteResponse(DataOutputStream out, HttpRequest request, Socket realServerSocket) throws IOException {
 		BufferedInputStream realServerResult = new BufferedInputStream(realServerSocket.getInputStream());
@@ -90,7 +121,6 @@ public class ProxyThread extends Thread {
 		byte chunck[] = new byte[ BUFFER_SIZE ];
 		int index = realServerResult.read( chunck, 0, BUFFER_SIZE );
 		StringBuilder response = new StringBuilder();
-		HttpResponse httpResponse = new HttpResponse();
 		while ( index != -1 ) {
 			if (!isExceptSaveFileExtension(request))response.append(new String(chunck, 0, index, Charset.forName("UTF-8")));
 			out.write(chunck, 0, index);
@@ -107,17 +137,6 @@ public class ProxyThread extends Thread {
 		    writerToRealServerSocket.println("");
 			writerToRealServerSocket.flush();
 		}
-	}
-
-	private HttpRequest createHttpRequestData(String inputLine, HttpRequest request, boolean isFirstRow) {
-		StringTokenizer tok = new StringTokenizer(inputLine);
-		tok.nextToken();
-		if (isFirstRow) {
-		    request = new HttpRequest(inputLine);
-		} else if (request != null) {
-			request.append(inputLine.split(": ")[0], inputLine.split(": ")[1]);
-		}
-		return request;
 	}
 
 	private PrintWriter getRealServerSocketOutputStream(HttpRequest request, Socket realServerSocket) throws UnknownHostException, IOException, URISyntaxException {                    	
@@ -166,4 +185,20 @@ public class ProxyThread extends Thread {
     	}
     	return false;
     }
+
+	public HttpRequest getHttpRequest() {
+		return httpRequest;
+	}
+
+	public HttpResponse getHttpResponse() {
+		return httpResponse;
+	}
+
+	public void setHttpRequest(HttpRequest httpRequest) {
+		this.httpRequest = httpRequest;
+	}
+
+	public void setHttpResponse(HttpResponse httpResponse) {
+		this.httpResponse = httpResponse;
+	}
 }
