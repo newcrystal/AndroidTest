@@ -64,6 +64,7 @@ public class ProxyThread extends Thread {
 		    	saveAndWriteResponse(out, httpRequest, realServerSocket);
              } catch (Exception e) {
                 System.err.println("Encountered exception: " + e);
+                System.err.println("Exception URL : " + httpRequest.getUrl());
                 out.writeBytes("");
             }
 		    out.flush();
@@ -85,7 +86,7 @@ public class ProxyThread extends Thread {
             if (socket != null) {
                 socket.close();
             }
-            urlList.add(new ProxyResult(getHttpRequest(), getHttpResponse()));
+            //urlList.add(new ProxyResult(getHttpRequest(), getHttpResponse()));
         } catch (Exception e) {
     	  e.printStackTrace(); 
        }
