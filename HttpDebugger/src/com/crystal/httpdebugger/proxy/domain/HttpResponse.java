@@ -4,14 +4,22 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class HttpResponse {
+	private long id = 0;
 	private String statusCode;
 	private String message;
 	private String protocol;
 	private Map<String, String> header = new HashMap<String, String>();
 	private String body;
+	private long responseTime;
 	
 	public void setStatusCode(String statusCode) {
 		this.statusCode = statusCode;
+	}
+	public long getId() {
+		return id;
+	}
+	public void setId(long id) {
+		this.id = id;
 	}
 	public String getHeader(String name) {
 		return header.get(name);
@@ -39,5 +47,11 @@ public class HttpResponse {
 	}
 	public void setMessage(String message) {
 		this.message = message;
+	}
+	public long getResponseTime() {
+		return responseTime;
+	}
+	public void setResponseTime(long responseTime) {
+		this.responseTime = responseTime;
 	}
 }

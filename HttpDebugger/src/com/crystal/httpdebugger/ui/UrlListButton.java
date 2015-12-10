@@ -3,6 +3,7 @@ package com.crystal.httpdebugger.ui;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
+import android.view.Gravity;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
 
@@ -25,7 +26,6 @@ public class UrlListButton extends Button {
 
 		setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
 		setTextSize(15);
-		setPadding(10, 10, 10, 0);
 		if (statusCode == null) {
 			setBackground(unkwonStroke);
 		} else if (statusCode.equals("200") || statusCode.equals("302")) {
@@ -38,8 +38,8 @@ public class UrlListButton extends Button {
 			setBackground(unkwonStroke);
 		}
 
-		setTextColor(Color.BLACK);
-		setBackgroundColor(Color.WHITE);
+		setTextColor(Color.WHITE);
+		setGravity(Gravity.START);
 	}
 
 	public GradientDrawable setRectangleStorke(GradientDrawable drawable, int color) {

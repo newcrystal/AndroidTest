@@ -1,0 +1,15 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/httpResponseInfo"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000">
+    <TextView
+        android:id="@+id/request_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/response_tab_title" 
+        android:textColor="#ffffff"
+        android:textSize="100sp"
+        android:background="#ffffee"
+        />
+</RelativeLayout>

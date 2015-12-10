@@ -4,8 +4,11 @@ import java.io.IOException;
 import java.net.ServerSocket;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -19,7 +22,7 @@ import com.crystal.httpdebugger.ui.UrlListButton;
 
 public class HTTPDebugActivity extends Activity {
 	private LinearLayout urlList;
-
+	
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_url_list);
@@ -77,20 +80,41 @@ public class HTTPDebugActivity extends Activity {
 				HttpRequest request = results[0].getHttpRequest();
 				HttpResponse response = results[0].getHttpResponse();
 				String statusCode = (response == null) ? "???" : response.getStatusCode();
+				statusCode = (statusCode == null) ? "???" : statusCode;
 				UrlListButton urlButton = new UrlListButton(getBaseContext(), statusCode);
 				String url = request.getUrl();
 				if (url != null && !url.equals("")) {
-					urlButton.setText(url);
-					TextView statusCodeButton = new StatusCodeText(getBaseContext(), statusCode);
+					String slicedUrl = url.substring(0, Math.min(url.length(), 70));
+					urlButton.setText( new StringBuilder().append(slicedUrl).append("... ").append(response.getResponseTime()).append("ms"));
+					urlButton.setOnClickListener(new UrlOnClickListener(request.getId()));
+					
+					TextView statusCodeView = new StatusCodeText(getBaseContext(), statusCode);
 					LinearLayout urlObj = new LinearLayout(getBaseContext());
-					urlObj.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+					LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+					params.setMargins(0, 0, 0, 5);
+					urlObj.setLayoutParams(params);
+					
+					urlObj.setLayoutParams(params);
 					urlObj.setOrientation(LinearLayout.HORIZONTAL);
 					
-					urlObj.addView(statusCodeButton);
+					urlObj.addView(statusCodeView);
 					urlObj.addView(urlButton);
 					urlList.addView(urlObj);
 				}
 			}
 		}
 	}
+
+	public class UrlOnClickListener implements OnClickListener {
+		private long id;
+		public UrlOnClickListener(long id) {
+			this.id = id;
+		}
+		@Override
+		public void onClick(View v) {
+			Intent intent = new Intent(getApplicationContext(), HTTPDebugDetailActivity.class);
+			intent.putExtra("id", id);
+			startActivity(intent);
+		}
+	}	
 }

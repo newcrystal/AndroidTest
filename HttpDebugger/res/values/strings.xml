@@ -4,5 +4,6 @@
     <string name="app_name">HttpDebugger</string>
     <string name="http_debug_start">Http Debug Start!</string>
     <string name="action_settings">Action</string>
-
+	<string name="request_tab_title">Request</string>
+	<string name="response_tab_title">Response</string>
 </resources>

@@ -3,6 +3,7 @@ package com.crystal.httpdebugger.proxy;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -16,6 +17,9 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
+import java.util.Calendar;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.InflaterInputStream;
 
 import com.crystal.httpdebugger.proxy.domain.HttpRequest;
 import com.crystal.httpdebugger.proxy.domain.HttpResponse;
@@ -23,10 +27,12 @@ import com.crystal.httpdebugger.util.InputStreamUtils;
 
 public class ProxyThread extends Thread {
     private Socket socket = null;
-    private static final int BUFFER_SIZE = 1024;
+    private static final int BUFFER_SIZE = 1024*4;
     private static final int SOCKET_TIMEOUT = 3000;
     private HttpRequest httpRequest = new HttpRequest();
     private HttpResponse httpResponse = new HttpResponse();
+    private InputStream realServerInputStream = null;
+    private long id = 0;
     
     public ProxyThread(Socket socket) {
         super("ProxyThread");
@@ -35,6 +41,8 @@ public class ProxyThread extends Thread {
 
     @Override
     public void run() {
+    	long startTime = Calendar.getInstance().getTimeInMillis();
+    	id = startTime;
         DataOutputStream out = getDataOutputStream();
 		BufferedReader in = getBufferedReader();
 
@@ -43,7 +51,8 @@ public class ProxyThread extends Thread {
         PrintWriter writerToRealServerSocket = null;
         try {
         	writerToRealServerSocket = readRequestAndWriteOutputStream(in, realServerSocket);
-		} catch (IOException e) {
+        	realServerInputStream = realServerSocket.getInputStream();
+        } catch (IOException e) {
 			e.printStackTrace();
 		}
         
@@ -82,14 +91,19 @@ public class ProxyThread extends Thread {
         } catch (Exception e) {
     	  e.printStackTrace(); 
        }
+       long endTime = Calendar.getInstance().getTimeInMillis();
+       httpResponse.setResponseTime(endTime-startTime);
        
+       httpRequest.setId(id);
+       httpResponse.setId(id);
    }
 
 	private PrintWriter readRequestAndWriteOutputStream(BufferedReader in, Socket realServerSocket) throws IOException, UnknownHostException {
 		String inputLine;
 		boolean isFirstRow = true;
 		PrintWriter writerToRealServerSocket = null;
-		
+		StringBuilder body = new StringBuilder();
+		boolean isBodyStart = false;
 		while ((inputLine = in.readLine()) != null && !"".equals(inputLine)) {
 		    try {
 		        httpRequest.createHttpRequestData(inputLine, isFirstRow);
@@ -104,35 +118,56 @@ public class ProxyThread extends Thread {
 					e.printStackTrace();
 				}
 		    }
+		   
+		   if (!isBodyStart && inputLine.isEmpty()) isBodyStart = true; 
+		   if (isBodyStart) body.append(inputLine);
 		   writerToRealServerSocket.println(inputLine); 
 		   isFirstRow = false;
 		}
+
+		httpRequest.setBody(body.toString());
 		return writerToRealServerSocket;
 	}
 
 	private void setAndWriteResponse(DataOutputStream out, HttpRequest request, Socket realServerSocket) throws IOException {
 		InputStream inputStream = setResponseHeader(out, realServerSocket);
+		FilterInputStream inputStreamWrapper = null;
+		if (isGzipped()) {
+			inputStreamWrapper = new GZIPInputStream(inputStream);
+		} else if (isDeflate()) {
+			inputStreamWrapper = new InflaterInputStream(inputStream);
+		} else {
+			inputStreamWrapper = new BufferedInputStream(inputStream);
+		}
 		
-		BufferedInputStream realServerResult = new BufferedInputStream(inputStream);
 		byte chunck[] = new byte[ BUFFER_SIZE ];
-		int index = realServerResult.read( chunck, 0, BUFFER_SIZE );
+		int index = inputStreamWrapper.read( chunck, 0, BUFFER_SIZE );
 		StringBuilder response = new StringBuilder();
 		while ( index != -1 ) {
-			if (!isExceptSetBodyFileExtension())response.append(new String(chunck, 0, index, Charset.forName("UTF-8")));
+			if (!isExceptSetBodyFileExtension() && !isNotModified()){
+				response.append(new String(chunck, 0, index, Charset.forName("UTF-8")));
+			}
 			out.write(chunck, 0, index);
-			index = realServerResult.read(chunck, 0, BUFFER_SIZE);
+			index = inputStreamWrapper.read(chunck, 0, BUFFER_SIZE);
 		}
 		httpResponse.setBody(response.toString());
 	}
 
+	private boolean isDeflate() {
+		return httpResponse.getHeader("Content-Encoding") != null && httpResponse.getHeader("Content-Encoding").indexOf("deflate") >= 0;
+	}
+
+	private boolean isGzipped() {
+		return httpResponse.getHeader("Content-Encoding") != null && httpResponse.getHeader("Content-Encoding").indexOf("gzip") >= 0;
+	}
+
 	private InputStream setResponseHeader(DataOutputStream out, Socket realServerSocket) throws IOException {
-		InputStream inputStream = realServerSocket.getInputStream();
 		String line = null;
 		boolean isFirst = true;
 		StringBuilder header = new StringBuilder();
 		
 		do {
-			line = InputStreamUtils.readLine(inputStream);
+			line = InputStreamUtils.readLine(realServerInputStream);
 			if (line == null) {
 				out.writeBytes("");
 				break;
@@ -154,7 +189,7 @@ public class ProxyThread extends Thread {
 			header.append(line).append("\n");
 		} while (!line.isEmpty());
 		out.writeBytes(header.toString());
-		return inputStream;
+		return realServerInputStream;
 	}
 
 	private void flushWriterToRealServerSocket(
@@ -207,8 +242,12 @@ public class ProxyThread extends Thread {
 
     private boolean isExceptSetBodyFileExtension() {
     	String contentType = httpResponse.getHeader("Content-Type");
-    	if (contentType != null && contentType.indexOf("image/gif") >= 0) return true;
+    	if (contentType != null && contentType.indexOf("image/") >= 0) return true;
     	return false;
+    }
+
+    private boolean isNotModified() {
+    	return httpResponse.getStatusCode().equals("302");
     }
 
 	public HttpRequest getHttpRequest() {

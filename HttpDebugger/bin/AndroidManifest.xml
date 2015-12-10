@@ -25,6 +25,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".HTTPDebugActivity"></activity>
+        <activity android:name=".HTTPDebugDetailActivity"></activity>
     </application>
 
 </manifest>
