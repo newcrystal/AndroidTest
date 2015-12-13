@@ -5,21 +5,20 @@ import android.app.ActionBar.Tab;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
-import android.widget.Toast;
 
-import com.crystal.httpdebugger.ui.RequestFragment;
-import com.crystal.httpdebugger.ui.RequestTabListener;
-import com.crystal.httpdebugger.ui.ResponseFragment;
-import com.crystal.httpdebugger.ui.ResponseTabListener;
+import com.crystal.httpdebugger.ui.tab.RequestFragment;
+import com.crystal.httpdebugger.ui.tab.RequestTabListener;
+import com.crystal.httpdebugger.ui.tab.ResponseFragment;
+import com.crystal.httpdebugger.ui.tab.ResponseTabListener;
 
 public class HTTPDebugDetailActivity extends FragmentActivity {
-	private long id;
+	private int id;
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_detail);
 		
 		Intent receivedIntent = getIntent();
-		id = receivedIntent.getLongExtra("id", 0);
+		id = receivedIntent.getIntExtra("id", 0);
 		
 		ActionBar actionBar = getActionBar();
 		actionBar.setDisplayShowHomeEnabled(false);
@@ -27,7 +26,7 @@ public class HTTPDebugDetailActivity extends FragmentActivity {
 		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 		
 		Bundle bundle = new Bundle();
-		bundle.putLong("id", id);
+		bundle.putInt("id", id);
 		
 		Tab requestTab = actionBar.newTab();
 		requestTab.setText("Request");

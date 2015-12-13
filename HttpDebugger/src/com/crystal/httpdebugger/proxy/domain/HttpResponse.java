@@ -4,22 +4,31 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class HttpResponse {
-	private long id = 0;
+	private int id = 0;
 	private String statusCode;
 	private String message;
 	private String protocol;
 	private Map<String, String> header = new HashMap<String, String>();
 	private String body;
-	private long responseTime;
+	private int responseTime;
+	
+	public boolean isEmpty(){
+		return (statusCode == null || statusCode.isEmpty())
+				&& (message == null || message.isEmpty())
+				&& (protocol == null || protocol.isEmpty());
+	}
 	
 	public void setStatusCode(String statusCode) {
 		this.statusCode = statusCode;
 	}
-	public long getId() {
+	public int getId() {
 		return id;
 	}
-	public void setId(long id) {
+	public void setId(int id) {
 		this.id = id;
+	}
+	public Map<String, String> getHeader() {
+		return header;
 	}
 	public String getHeader(String name) {
 		return header.get(name);
@@ -48,10 +57,10 @@ public class HttpResponse {
 	public void setMessage(String message) {
 		this.message = message;
 	}
-	public long getResponseTime() {
+	public int getResponseTime() {
 		return responseTime;
 	}
-	public void setResponseTime(long responseTime) {
+	public void setResponseTime(int responseTime) {
 		this.responseTime = responseTime;
 	}
 }

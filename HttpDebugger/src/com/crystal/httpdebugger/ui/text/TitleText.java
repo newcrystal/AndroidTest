@@ -1,4 +1,4 @@
-package com.crystal.httpdebugger.ui;
+package com.crystal.httpdebugger.ui.text;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -6,8 +6,8 @@ import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 
-public class TitleTextView extends TextView {
-	public TitleTextView(Context context) {
+public class TitleText extends TextView {
+	public TitleText(Context context) {
 		super(context);
 		setBackgroundColor(Color.WHITE);
 		setTextColor(Color.BLACK);

@@ -1,4 +1,4 @@
-package com.crystal.httpdebugger.ui;
+package com.crystal.httpdebugger.ui.list;
 
 import android.content.Context;
 import android.graphics.Color;

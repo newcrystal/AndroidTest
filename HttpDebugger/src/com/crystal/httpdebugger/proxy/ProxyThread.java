@@ -32,7 +32,6 @@ public class ProxyThread extends Thread {
     private HttpRequest httpRequest = new HttpRequest();
     private HttpResponse httpResponse = new HttpResponse();
     private InputStream realServerInputStream = null;
-    private long id = 0;
     
     public ProxyThread(Socket socket) {
         super("ProxyThread");
@@ -42,7 +41,6 @@ public class ProxyThread extends Thread {
     @Override
     public void run() {
     	long startTime = Calendar.getInstance().getTimeInMillis();
-    	id = startTime;
         DataOutputStream out = getDataOutputStream();
 		BufferedReader in = getBufferedReader();
 
@@ -92,10 +90,7 @@ public class ProxyThread extends Thread {
     	  e.printStackTrace(); 
        }
        long endTime = Calendar.getInstance().getTimeInMillis();
-       httpResponse.setResponseTime(endTime-startTime);
-       
-       httpRequest.setId(id);
-       httpResponse.setId(id);
+       httpResponse.setResponseTime((int)(endTime-startTime));
    }
 
 	private PrintWriter readRequestAndWriteOutputStream(BufferedReader in, Socket realServerSocket) throws IOException, UnknownHostException {
@@ -132,20 +127,20 @@ public class ProxyThread extends Thread {
 	private void setAndWriteResponse(DataOutputStream out, HttpRequest request, Socket realServerSocket) throws IOException {
 		InputStream inputStream = setResponseHeader(out, realServerSocket);
 		FilterInputStream inputStreamWrapper = null;
-		if (isGzipped()) {
+		/*if (isGzipped()) {
 			inputStreamWrapper = new GZIPInputStream(inputStream);
 		} else if (isDeflate()) {
 			inputStreamWrapper = new InflaterInputStream(inputStream);
-		} else {
+		} else {*/
 			inputStreamWrapper = new BufferedInputStream(inputStream);
-		}
+		//}
 		
 		byte chunck[] = new byte[ BUFFER_SIZE ];
 		int index = inputStreamWrapper.read( chunck, 0, BUFFER_SIZE );
 		StringBuilder response = new StringBuilder();
 		while ( index != -1 ) {
 			if (!isExceptSetBodyFileExtension() && !isNotModified()){
-				response.append(new String(chunck, 0, index, Charset.forName("UTF-8")));
+				response.append(new String(chunck, 0, index));
 			}
 			out.write(chunck, 0, index);
 			index = inputStreamWrapper.read(chunck, 0, BUFFER_SIZE);

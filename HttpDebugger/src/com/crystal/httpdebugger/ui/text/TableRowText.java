@@ -1,13 +1,13 @@
-package com.crystal.httpdebugger.ui;
+package com.crystal.httpdebugger.ui.text;
 
 import android.content.Context;
 import android.graphics.Color;
 import android.widget.TableRow;
 import android.widget.TextView;
 
-public class TableRowTextView extends TextView {
+public class TableRowText extends TextView {
 
-	public TableRowTextView(Context context) {
+	public TableRowText(Context context) {
 		super(context);
 		setLayoutParams(new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.WRAP_CONTENT));
 		setTextColor(Color.WHITE);

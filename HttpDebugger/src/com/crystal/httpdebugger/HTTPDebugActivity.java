@@ -13,19 +13,23 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.crystal.httpdebugger.db.DatabaseQuery;
 import com.crystal.httpdebugger.proxy.ProxyThread;
 import com.crystal.httpdebugger.proxy.domain.HttpRequest;
 import com.crystal.httpdebugger.proxy.domain.HttpResponse;
 import com.crystal.httpdebugger.proxy.domain.ProxyResult;
-import com.crystal.httpdebugger.ui.StatusCodeText;
-import com.crystal.httpdebugger.ui.UrlListButton;
+import com.crystal.httpdebugger.ui.list.UrlListButton;
+import com.crystal.httpdebugger.ui.text.StatusCodeText;
 
 public class HTTPDebugActivity extends Activity {
 	private LinearLayout urlList;
+	private DatabaseQuery dbQuery;
 	
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_url_list);
+		
+		dbQuery = new DatabaseQuery(this);
 		
 		urlList = (LinearLayout) findViewById(R.id.urlListLayout);
 		urlList.setVerticalScrollBarEnabled(true);
@@ -54,8 +58,16 @@ public class HTTPDebugActivity extends Activity {
 	            try {
 	            	ProxyThread thread = new ProxyThread(serverSocket.accept());
 	            	thread.run();
-	            	ProxyResult result = new ProxyResult(thread.getHttpRequest(), thread.getHttpResponse());
-	            	publishProgress(result);
+	            	
+	            	int id = dbQuery.insertRequest(thread.getHttpRequest());
+					if (id > 0) {
+						thread.getHttpRequest().setId(id);
+						thread.getHttpResponse().setId(id);
+						dbQuery.insertResponse(thread.getHttpResponse());
+						
+						ProxyResult result = new ProxyResult(thread.getHttpRequest(), thread.getHttpResponse());
+		            	publishProgress(result);
+					}
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -79,35 +91,50 @@ public class HTTPDebugActivity extends Activity {
 			if(results.length > 0) {
 				HttpRequest request = results[0].getHttpRequest();
 				HttpResponse response = results[0].getHttpResponse();
-				String statusCode = (response == null) ? "???" : response.getStatusCode();
-				statusCode = (statusCode == null) ? "???" : statusCode;
-				UrlListButton urlButton = new UrlListButton(getBaseContext(), statusCode);
 				String url = request.getUrl();
 				if (url != null && !url.equals("")) {
-					String slicedUrl = url.substring(0, Math.min(url.length(), 70));
-					urlButton.setText( new StringBuilder().append(slicedUrl).append("... ").append(response.getResponseTime()).append("ms"));
-					urlButton.setOnClickListener(new UrlOnClickListener(request.getId()));
-					
+					String statusCode = getStatusCode(response);
+					LinearLayout row = createRow();
+
 					TextView statusCodeView = new StatusCodeText(getBaseContext(), statusCode);
-					LinearLayout urlObj = new LinearLayout(getBaseContext());
-					LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-					params.setMargins(0, 0, 0, 5);
-					urlObj.setLayoutParams(params);
+					row.addView(statusCodeView);
 					
-					urlObj.setLayoutParams(params);
-					urlObj.setOrientation(LinearLayout.HORIZONTAL);
+					UrlListButton urlButton = createUrlButton(request, response, url, statusCode);
+					row.addView(urlButton);
 					
-					urlObj.addView(statusCodeView);
-					urlObj.addView(urlButton);
-					urlList.addView(urlObj);
+					urlList.addView(row);
 				}
 			}
+		}
+
+		private UrlListButton createUrlButton(HttpRequest request, HttpResponse response, String url, String statusCode) {
+			UrlListButton urlButton = new UrlListButton(getBaseContext(), statusCode);
+			String slicedUrl = url.substring(0, Math.min(url.length(), 70));
+			urlButton.setText( new StringBuilder().append(slicedUrl).append("... ").append(response.getResponseTime()).append("ms"));
+			urlButton.setOnClickListener(new UrlOnClickListener(request.getId()));
+			return urlButton;
+		}
+
+		private LinearLayout createRow() {
+			LinearLayout row = new LinearLayout(getBaseContext());
+			LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+			params.setMargins(0, 0, 0, 5);
+			row.setLayoutParams(params);
+			row.setOrientation(LinearLayout.HORIZONTAL);
+			return row;
+		}
+
+		private String getStatusCode(HttpResponse response) {
+			final String UNKWON_STATUS = "???";
+			String statusCode = (response == null) ? UNKWON_STATUS : response.getStatusCode();
+			statusCode = (statusCode == null) ? UNKWON_STATUS : statusCode;
+			return statusCode;
 		}
 	}
 
 	public class UrlOnClickListener implements OnClickListener {
-		private long id;
-		public UrlOnClickListener(long id) {
+		private int id;
+		public UrlOnClickListener(int id) {
 			this.id = id;
 		}
 		@Override
