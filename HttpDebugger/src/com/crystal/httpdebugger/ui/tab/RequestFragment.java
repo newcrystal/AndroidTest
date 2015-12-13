@@ -44,8 +44,8 @@ public class RequestFragment extends Fragment {
 			HttpRequest request = dbQuery.getRequest(id);
 			layout.addView(getRequestTextView(request));
 			layout.addView(getRequestHeaderTable(request));
-			layout.addView(getRequestBodyTitleTextView());
-			layout.addView(getRequestBodyTextView(request));
+			if (request.getBody() != null) layout.addView(getRequestBodyTitleTextView());
+			if (request.getBody() != null) layout.addView(getRequestBodyTextView(request));
 			
 			fragmentView.addView(layout);
 		}

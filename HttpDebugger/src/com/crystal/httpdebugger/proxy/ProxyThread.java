@@ -139,15 +139,16 @@ public class ProxyThread extends Thread {
 		ByteArrayOutputStream responseStream = new ByteArrayOutputStream();
 		byte chunck[] = new byte[ BUFFER_SIZE ];
 		int index = inputStreamWrapper.read( chunck, 0, BUFFER_SIZE );
+		StringBuilder response = new StringBuilder();
 		while ( index != -1 ) {
 			if (!isExceptSetBodyFileExtension() && !isNotModified()){
-				responseStream.write(chunck, 0, index);
+				response.append(new String(chunck, 0, index));
 			}
+		
+			out.write(chunck, 0, index);
 			index = inputStreamWrapper.read(chunck, 0, BUFFER_SIZE);
 		}
-		out.write(responseStream.toByteArray());
-		out.writeBytes("");
-		httpResponse.setBody(new String(responseStream.toByteArray(), Charset.forName("UTF-8")));
+		httpResponse.setBody(response.toString());
 	}
 
 	private boolean isDeflate() {

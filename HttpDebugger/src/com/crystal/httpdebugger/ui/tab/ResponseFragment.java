@@ -44,8 +44,8 @@ public class ResponseFragment extends Fragment {
 			HttpResponse response = dbQuery.getResponse(id);
 			layout.addView(getResponseTextView(response));
 			layout.addView(getResponseHeaderTable(response));
-			layout.addView(getResponseBodyTitleTextView());
-			layout.addView(getResponseBodyTextView(response));
+			if (response.getBody() != null) layout.addView(getResponseBodyTitleTextView());
+			if (response.getBody() != null) layout.addView(getResponseBodyTextView(response));
 			
 			fragmentView.addView(layout);
 		}
