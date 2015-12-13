@@ -2,6 +2,7 @@ package com.crystal.httpdebugger.proxy;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.FilterInputStream;
 import java.io.IOException;
@@ -17,6 +18,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.InflaterInputStream;
@@ -134,18 +136,18 @@ public class ProxyThread extends Thread {
 		} else {*/
 			inputStreamWrapper = new BufferedInputStream(inputStream);
 		//}
-		
+		ByteArrayOutputStream responseStream = new ByteArrayOutputStream();
 		byte chunck[] = new byte[ BUFFER_SIZE ];
 		int index = inputStreamWrapper.read( chunck, 0, BUFFER_SIZE );
-		StringBuilder response = new StringBuilder();
 		while ( index != -1 ) {
 			if (!isExceptSetBodyFileExtension() && !isNotModified()){
-				response.append(new String(chunck, 0, index));
+				responseStream.write(chunck, 0, index);
 			}
-			out.write(chunck, 0, index);
 			index = inputStreamWrapper.read(chunck, 0, BUFFER_SIZE);
 		}
-		httpResponse.setBody(response.toString());
+		out.write(responseStream.toByteArray());
+		out.writeBytes("");
+		httpResponse.setBody(new String(responseStream.toByteArray(), Charset.forName("UTF-8")));
 	}
 
 	private boolean isDeflate() {
@@ -164,7 +166,7 @@ public class ProxyThread extends Thread {
 		do {
 			line = InputStreamUtils.readLine(realServerInputStream);
 			if (line == null) {
-				out.writeBytes("");
+				if (isFirst) out.writeBytes("");
 				break;
 			}
 			if (isFirst) {
