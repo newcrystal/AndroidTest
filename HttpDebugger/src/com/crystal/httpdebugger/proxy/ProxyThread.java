@@ -42,8 +42,7 @@ public class ProxyThread extends Thread {
 
     @Override
     public void run() {
-    	long startTime = Calendar.getInstance().getTimeInMillis();
-        DataOutputStream out = getDataOutputStream();
+    	DataOutputStream out = getDataOutputStream();
 		BufferedReader in = getBufferedReader();
 
 
@@ -91,8 +90,6 @@ public class ProxyThread extends Thread {
         } catch (Exception e) {
     	  e.printStackTrace(); 
        }
-       long endTime = Calendar.getInstance().getTimeInMillis();
-       httpResponse.setResponseTime((int)(endTime-startTime));
    }
 
 	private PrintWriter readRequestAndWriteOutputStream(BufferedReader in, Socket realServerSocket) throws IOException, UnknownHostException {

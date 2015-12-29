@@ -39,7 +39,7 @@ public class UrlListButton extends Button {
 		}
 
 		setTextColor(Color.WHITE);
-		setGravity(Gravity.START);
+		setGravity(Gravity.START|Gravity.CENTER_HORIZONTAL);
 	}
 
 	public GradientDrawable setRectangleStorke(GradientDrawable drawable, int color) {

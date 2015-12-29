@@ -1,0 +1,11 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.crystal.httpdebugger.HTTPDebugActivity" >
+
+    <item
+        android:id="@+id/deleteButton"
+        android:showAsAction="ifRoom"
+        android:title="@string/delete"
+        android:icon="@android:drawable/ic_menu_delete"/>
+
+</menu>

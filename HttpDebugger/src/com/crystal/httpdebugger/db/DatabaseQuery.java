@@ -232,14 +232,18 @@ public class DatabaseQuery {
 		cursor.close();
 	}
 	
-	private void deleteAll(int id) {
-		String whereClause = "id = ?";
-		String[] whereArgs = {String.valueOf(id)};
-		db.delete(TABLE_REQUEST_BODY, whereClause, whereArgs);
-		db.delete(TABLE_RESPONSE_BODY, whereClause, whereArgs);
-		db.delete(TABLE_REQUEST_BASE_INFO, whereClause, whereArgs);
-		db.delete(TABLE_RESPONSE_BASE_INFO, whereClause, whereArgs);
-		db.delete(TABLE_REQUEST_HEADER, whereClause, whereArgs);
-		db.delete(TABLE_RESPONSE_HEADER, whereClause, whereArgs);
+	public void deleteAll() {
+		int count = db.delete(TABLE_REQUEST_BODY, null, null);
+		System.out.println(TABLE_REQUEST_BODY + " "+ count + " deleted.");
+		count = db.delete(TABLE_RESPONSE_BODY, null, null);
+		System.out.println(TABLE_RESPONSE_BODY + " "+ count + " deleted.");
+		count = db.delete(TABLE_REQUEST_BASE_INFO, null, null);
+		System.out.println(TABLE_REQUEST_BASE_INFO + " "+ count + " deleted.");
+		count = db.delete(TABLE_RESPONSE_BASE_INFO, null, null);
+		System.out.println(TABLE_RESPONSE_BASE_INFO + " "+ count + " deleted.");
+		count = db.delete(TABLE_REQUEST_HEADER, null, null);
+		System.out.println(TABLE_REQUEST_HEADER + " "+ count + " deleted.");
+		count = db.delete(TABLE_RESPONSE_HEADER, null, null);
+		System.out.println(TABLE_RESPONSE_HEADER + " "+ count + " deleted.");
 	}
 }

@@ -2,8 +2,12 @@
 <resources>
 
     <string name="app_name">HttpDebugger</string>
-    <string name="http_debug_start">Http Debug Start!</string>
+    <string name="http_debug_start">Http Debugger Start!</string>
     <string name="action_settings">Action</string>
 	<string name="request_tab_title">Request</string>
 	<string name="response_tab_title">Response</string>
+	<string name="delete">DELETE</string>
+	<string name="login_first">PlayNC Login first.\nIt is not support HTTPS.</string>
+	<string name="login">login</string>
+	<string name="wifi_setting">Set wi-fi proxy.\nHostName : localhost, Port : 10000</string>
 </resources>

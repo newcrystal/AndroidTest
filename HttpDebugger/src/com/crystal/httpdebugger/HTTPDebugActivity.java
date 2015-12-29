@@ -4,9 +4,14 @@ import java.io.IOException;
 import java.net.ServerSocket;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
@@ -109,8 +114,11 @@ public class HTTPDebugActivity extends Activity {
 
 		private UrlListButton createUrlButton(HttpRequest request, HttpResponse response, String url, String statusCode) {
 			UrlListButton urlButton = new UrlListButton(getBaseContext(), statusCode);
-			String slicedUrl = url.substring(0, Math.min(url.length(), 70));
-			urlButton.setText( new StringBuilder().append(slicedUrl).append("... ").append(response.getResponseTime()).append("ms"));
+			final int MAX_URL_LENGTH = 70;
+			String slicedUrl = url.substring(0, Math.min(url.length(), MAX_URL_LENGTH));
+			StringBuilder urlText = new StringBuilder().append(request.getMethod()).append(" ").append(slicedUrl);
+			if (url.length() > MAX_URL_LENGTH) urlText.append("...");		
+			urlButton.setText(urlText.toString());
 			urlButton.setOnClickListener(new UrlOnClickListener(request.getId()));
 			return urlButton;
 		}
@@ -144,4 +152,35 @@ public class HTTPDebugActivity extends Activity {
 			startActivity(intent);
 		}
 	}	
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.url_list_menu, menu);
+		return true;
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+			case R.id.deleteButton :
+				new AlertDialog.Builder(this)
+				.setIcon(android.R.drawable.ic_dialog_alert)
+				.setTitle("Delete")
+				.setMessage("Do you really want to delete?")
+				.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						dbQuery.deleteAll();
+						urlList.removeAllViews();
+					}
+				})
+				.setNegativeButton("No", null)
+				.show();
+				return true;
+			default :
+				return super.onOptionsItemSelected(item);
+		}
+		
+	}
 }

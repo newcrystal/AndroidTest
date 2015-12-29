@@ -55,10 +55,10 @@ public class ResponseFragment extends Fragment {
 	public TextView getResponseTextView(HttpResponse HttpResponse) {
 		TextView responseText = new TitleText(getActivity());
 		
-		StringBuilder text = new StringBuilder()
-		.append(HttpResponse.getStatusCode()).append(BLANK)
-		.append(HttpResponse.getMessage()).append(BLANK)
-		.append(HttpResponse.getProtocol()).append(BLANK);
+		StringBuilder text = new StringBuilder();
+		if (text != null) text.append(HttpResponse.getStatusCode()).append(BLANK);
+		if (text != null) text.append(HttpResponse.getMessage()).append(BLANK);
+		if (text != null) text.append(HttpResponse.getProtocol()).append(BLANK);
 		
 		responseText.setText(text);
 		return responseText;

@@ -11,7 +11,7 @@ public class TitleText extends TextView {
 		super(context);
 		setBackgroundColor(Color.WHITE);
 		setTextColor(Color.BLACK);
-		setTextSize(20);
+		setTextSize(15);
 		
 		LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
 		params.setMargins(0, 20, 0, 20);

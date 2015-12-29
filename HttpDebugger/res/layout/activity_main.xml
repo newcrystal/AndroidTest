@@ -1,4 +1,4 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -6,11 +6,48 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
+    android:background="@color/BLACK"
     tools:context="com.crystal.httpdebugger.MainActivity" >
-
-    <Button
-        android:id="@+id/startBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/http_debug_start" />
-</RelativeLayout>
+    <LinearLayout
+        android:id="@+id/preTasks"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:orientation="vertical">
+		<TextView
+		    android:id="@+id/loginText"
+		    android:layout_width="match_parent"
+		    android:layout_height="wrap_content"
+		    android:text="@string/login_first"
+		    android:textColor="@color/WHITE"
+		    android:textSize="20dp"
+		/>
+		<ImageView
+		    android:id="@+id/loginScreenShot"
+		    android:layout_width="match_parent"
+		    android:layout_height="wrap_content"
+		    android:src="@drawable/login_screen_shot"
+			android:contentDescription="@string/login"
+			android:layout_marginBottom="30dp"/>
+		<TextView
+		    android:id="@+id/wifiSetting"
+		    android:layout_width="match_parent"
+		    android:layout_height="wrap_content"
+		    android:text="@string/wifi_setting"
+		    android:textColor="@color/WHITE"
+		    android:textSize="20dp"/>
+		<ImageView
+		    android:id="@+id/wifiScreenShot"
+		    android:layout_width="match_parent"
+		    android:layout_height="wrap_content"
+		    android:src="@drawable/wifi"
+		    android:contentDescription="@string/wifi_setting"
+		    android:layout_marginBottom="30dp" />
+	    <Button
+	        android:id="@+id/startBtn"
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:background="@color/LIGHT_GREEN"
+	        android:text="@string/http_debug_start"
+	        android:textColor="@color/WHITE" />
+    </LinearLayout>
+</ScrollView>
