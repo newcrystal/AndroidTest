@@ -31,7 +31,6 @@ public class CopyOfCopyOfHTTPDebugActivity33 extends Activity {
 	private DatabaseQuery dbQuery;
 	
 	public void onCreate(Bundle savedInstanceState) {
-		
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_url_list);
 		
