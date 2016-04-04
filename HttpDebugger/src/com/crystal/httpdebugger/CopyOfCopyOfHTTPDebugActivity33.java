@@ -34,6 +34,7 @@ public class CopyOfCopyOfHTTPDebugActivity33 extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_url_list);
 		
+		
 		dbQuery = new DatabaseQuery(this);
 		
 		urlList = (LinearLayout) findViewById(R.id.urlListLayout);
